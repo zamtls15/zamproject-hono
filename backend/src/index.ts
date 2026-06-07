@@ -1,12 +1,19 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
+import { cors } from "hono/cors";
 import type { Bindings, Variables } from "./types/env";
 import { errorHandler } from "./middleware/error";
 import users from "./routes/users";
 import posts from "./routes/posts";
+import groups   from "./routes/gateway/groups";
+import gateways from "./routes/gateway/gateways";
+import secrets  from "./routes/gateway/secrets";
+import gwLogs   from "./routes/gateway/logs";
+import proxy    from "./routes/gateway/proxy";
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
+app.use("*", cors());
 app.use(logger());
 app.onError(errorHandler);
 
@@ -15,6 +22,10 @@ app.get("/health", (c) => c.json({ healthy: true }));
 
 app.route("/users", users);
 app.route("/posts", posts);
+app.route("/gateway", groups);
+app.route("/gateway", gateways);
+app.route("/gateway", secrets);
+app.route("/gateway", gwLogs);
+app.route("/gateway", proxy);
 
 export default app;
-

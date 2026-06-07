@@ -10,3 +10,22 @@ export const createUserSchema = z.object({
   email: z.string().email(),
   name: z.string().min(1).max(100),
 });
+
+export const createGroupSchema = z.object({
+  name: z.string().min(1).max(100),
+});
+
+export const createGatewaySchema = z.object({
+  name: z.string().min(1).max(100),
+  baseUrl: z.string().url(),
+  groupId: z.number().int().positive(),
+});
+
+export const updateGatewayStatusSchema = z.object({
+  status: z.enum(["ON", "OFF"]),
+});
+
+export const createSecretSchema = z.object({
+  keyName: z.string().min(1),
+  envVar: z.string().min(1),
+});

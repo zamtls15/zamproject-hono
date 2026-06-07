@@ -1,0 +1,1 @@
+ALTER TABLE `gateways` ADD `base_url` text NOT NULL;
