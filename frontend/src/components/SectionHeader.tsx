@@ -1,4 +1,4 @@
-export function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
+ export function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <div style={{ marginBottom: 20 }}>
       <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#f8fafc" }}>{title}</h2>

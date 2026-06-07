@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { List } from "react-window";
 
 // ─── CONFIG ────────────────────────────────────────────────────────────────
 const API = "http://localhost:8787";
@@ -443,6 +444,8 @@ function SecretsTab({
 }
 
 // ─── LOGS TAB ───────────────────────────────────────────────────────────────
+const MAX_LOGS = 1000;
+
 function LogsTab() {
   const [logs, setLogs]         = useState<Log[]>([]);
   const [loading, setLoading]   = useState(false);
@@ -451,7 +454,10 @@ function LogsTab() {
   const load = useCallback(async () => {
     setLoading(true);
     const r = await api("GET", "/gateway/logs");
-    if (r.success) setLogs(r.data.slice().reverse());
+    if (r.success) {
+      const reversed = r.data.slice().reverse();
+      setLogs(reversed.length > MAX_LOGS ? reversed.slice(0, MAX_LOGS) : reversed);
+    }
     setLoading(false);
   }, []);
 
@@ -459,6 +465,18 @@ function LogsTab() {
 
   const gwIds = [...new Set(logs.map(l => l.gatewayId).filter(Boolean) as number[])];
   const filtered = gwFilter === "all" ? logs : logs.filter(l => String(l.gatewayId) === gwFilter);
+
+  const LogRow = ({ index, style, logs }: { index: number; style: React.CSSProperties; logs: Log[] }) => {
+    const log = logs[index];
+    return (
+      <div style={{ ...style, display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderRadius: 6, border: `1px solid ${T.border}`, background: T.bg, boxSizing: "border-box" }}>
+        <span style={S.tag(log.status)}>{log.status}</span>
+        <span style={{ fontSize: 11, color: T.muted }}>gw: {log.gatewayId ?? "—"}</span>
+        {log.reason && <span style={{ fontSize: 11, color: T.muted2 }}>{log.reason}</span>}
+        <span style={S.logTime}>{log.createdAt ? new Date(log.createdAt).toLocaleString() : "—"}</span>
+      </div>
+    );
+  };
 
   return (
     <div>
@@ -484,14 +502,16 @@ function LogsTab() {
       </div>
 
       {filtered.length === 0 && <div style={S.empty}>No logs yet — make some requests first</div>}
-      {filtered.map(log => (
-        <div key={log.id} style={S.logRow}>
-          <span style={S.tag(log.status)}>{log.status}</span>
-          <span style={{ fontSize: 11, color: T.muted }}>gw: {log.gatewayId ?? "—"}</span>
-          {log.reason && <span style={{ fontSize: 11, color: T.muted2 }}>{log.reason}</span>}
-          <span style={S.logTime}>{log.createdAt ? new Date(log.createdAt).toLocaleString() : "—"}</span>
-        </div>
-      ))}
+      {filtered.length > 0 && (
+        <List<{ logs: Log[] }>
+          defaultHeight={600}
+          rowCount={filtered.length}
+          rowHeight={44}
+          rowComponent={LogRow}
+          rowProps={{ logs: filtered }}
+          style={{ width: "100%", height: 600 }}
+        />
+      )}
     </div>
   );
 }
