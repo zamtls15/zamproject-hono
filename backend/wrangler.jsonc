@@ -5,8 +5,8 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "zamproject-db",
-      "database_id": "YOUR_D1_DATABASE_ID"
+      "database_name": "getwaydb",
+      "database_id": "Yb4159a77-2591-44a3-a3d8-e31bed72e2b9"
     }
   ]
 }
