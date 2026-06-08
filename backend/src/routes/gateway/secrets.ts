@@ -14,6 +14,19 @@ app.get("/gateways/:id/secrets", async (c) => {
   return c.json({ success: true, data: all });
 });
 
+// Returns secrets as a flat { KEY: VALUE } map — useful for .env injection
+app.get("/gateways/:id/env", async (c) => {
+  const db = getDB(c.env.DB);
+  const all = await db
+    .select()
+    .from(gatewaySecrets)
+    .where(eq(gatewaySecrets.gatewayId, Number(c.req.param("id"))))
+    .all();
+  const env: Record<string, string> = {};
+  for (const s of all) env[s.keyName] = s.envVar;
+  return c.json(env);
+});
+
 app.post("/gateways/:id/secrets", validateJson(createSecretSchema), async (c) => {
   const body = c.get("validated") as typeof createSecretSchema._type;
   const db = getDB(c.env.DB);
