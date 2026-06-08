@@ -1,7 +1,7 @@
 import { Hono } from "hono";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { getDB } from "../../db";
-import { gatewayGroups } from "../../db/schema";
+import { gatewayGroups, gateways, gatewaySecrets } from "../../db/schema";
 import { createGroupSchema } from "../../lib/validators";
 import { validateJson } from "../../middleware/validate";
 import { AppError } from "../../lib/errors";
@@ -24,7 +24,21 @@ app.post("/groups", validateJson(createGroupSchema), async (c) => {
 
 app.delete("/groups/:id", async (c) => {
   const db = getDB(c.env.DB);
-  await db.delete(gatewayGroups).where(eq(gatewayGroups.id, Number(c.req.param("id"))));
+  const groupId = Number(c.req.param("id"));
+
+  const groupGateways = await db
+    .select({ id: gateways.id })
+    .from(gateways)
+    .where(eq(gateways.groupId, groupId))
+    .all();
+
+  if (groupGateways.length > 0) {
+    const gatewayIds = groupGateways.map((gw) => gw.id);
+    await db.delete(gatewaySecrets).where(inArray(gatewaySecrets.gatewayId, gatewayIds));
+    await db.delete(gateways).where(eq(gateways.groupId, groupId));
+  }
+
+  await db.delete(gatewayGroups).where(eq(gatewayGroups.id, groupId));
   return c.json({ success: true, data: null });
 });
 
