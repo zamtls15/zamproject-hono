@@ -18,7 +18,7 @@ export const createGroupSchema = z.object({
 export const createGatewaySchema = z.object({
   name: z.string().min(1).max(100),
   baseUrl: z.string().url(),
-  groupId: z.coerce.number().int().positive(),
+  groupId: z.coerce.number().int().positive().optional(),
 });
 
 export const updateGatewayStatusSchema = z.object({
