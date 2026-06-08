@@ -6,7 +6,19 @@
     {
       "binding": "DB",
       "database_name": "getwaydb",
-      "database_id": "b4159a77-2591-44a3-a3d8-e31bed72e2b9"
+      "database_id": "Yb4159a77-2591-44a3-a3d8-e31bed72e2b9"
     }
-  ]
+  ],
+  "env": {
+    "production": {
+      "vars": {
+        "FRONTEND_URL": "https://8b730266-847e-4103-8e04-245b6dd37c95-00-2kggqgfgp4p19.kirk.replit.dev"
+      }
+    },
+    "development": {
+      "vars": {
+        "FRONTEND_URL": "http://localhost:3000"
+      }
+    }
+  }
 }
