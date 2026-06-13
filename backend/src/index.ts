@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import type { Bindings, Variables } from "./types/env";
 import { errorHandler } from "./middleware/error";
@@ -12,16 +13,12 @@ import proxy    from "./routes/gateway/proxy";
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
-// CORS middleware — reads FRONTEND_URL from wrangler.jsonc env vars
-app.use("*", async (c, next) => {
-  const origin = c.env.FRONTEND_URL || "http://localhost:3000";
-  c.header("Access-Control-Allow-Origin", origin);
-  c.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-  c.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  c.header("Access-Control-Allow-Credentials", "true");
-  if (c.req.method === "OPTIONS") return c.text("");
-  await next();
-});
+app.use("*", cors({
+  origin: (origin) => origin || "http://localhost:3000",
+  credentials: true,
+  allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowHeaders: ["Content-Type", "Authorization"],
+}));
 
 app.use(logger());
 app.onError(errorHandler);
